@@ -1,7 +1,7 @@
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct OwnedPath {
-    path: String,
-    owners: Vec<String>,
+    pub path: String,
+    pub owners: Vec<String>,
 }
 
 pub type CodeOwners = Vec<OwnedPath>;

@@ -1,10 +1,9 @@
+mod owners;
 mod parser;
 
 use color_eyre::Result;
-use ignore::gitignore::{Gitignore, GitignoreBuilder};
-use ignore::Match;
-use std::collections::HashMap;
-use std::io::stdin;
+use ignore::gitignore::GitignoreBuilder;
+use std::{collections::HashMap, io::stdin};
 
 fn main() -> Result<()> {
     let codeowner_path = ".github/CODEOWNERS";
@@ -34,23 +33,12 @@ fn main() -> Result<()> {
         Some(line.to_string())
     });
 
-    find_owners(builder.build()?, owners_by_glob, paths)
-}
-
-fn find_owners<I: Iterator<Item = String>>(
-    matcher: Gitignore,
-    owners_by_glob: HashMap<String, parser::OwnedPath>,
-    paths: I,
-) -> Result<()> {
-    paths.for_each(|path| match matcher.matched(&path, false) {
-        Match::Ignore(glob) => {
-            if let Some(owner) = owners_by_glob.get(glob.original()) {
-                println!("{path}: {}", owner.owners.join(" "))
-            } else {
-                println!("{path}: No owner found for this path")
-            }
+    owners::find(builder.build()?, owners_by_glob, paths).for_each(|(path, owners)| {
+        if !owners.is_empty() {
+            println!("{path}: {}", owners.join(", "));
+        } else {
+            println!("{path}: No owners found");
         }
-        _ => println!("{path}: No owner"),
     });
 
     Ok(())

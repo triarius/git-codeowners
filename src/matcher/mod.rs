@@ -2,7 +2,7 @@ use color_eyre::Result;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::path::Path;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct OwnedMatcher {
     pub owners: Vec<String>,
     pub ignorer: Gitignore,

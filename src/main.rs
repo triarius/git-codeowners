@@ -23,20 +23,19 @@ fn main() -> Result<()> {
         Some(line.to_string())
     });
 
-    find_owners(owners.into_iter(), paths)?;
-
-    Ok(())
+    find_owners(owners, paths)
 }
 
-fn find_owners<T: Iterator<Item = matcher::OwnedMatcher>, U: Iterator<Item = String>>(
-    mut owners: T,
-    paths: U,
+fn find_owners<I: Iterator<Item = String>>(
+    owners: Vec<matcher::OwnedMatcher>,
+    paths: I,
 ) -> Result<()> {
     paths.for_each(|path| {
         let _ = owners
+            .clone()
+            .iter()
             .find(|owner| owner.ignorer.matched(&path, false).is_ignore())
             .map(|owner| println!("{}: {}", path, owner.owners.join(" ")));
     });
-
     Ok(())
 }

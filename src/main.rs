@@ -1,20 +1,31 @@
-mod matcher;
 mod parser;
 
 use color_eyre::Result;
+use ignore::gitignore::{Gitignore, GitignoreBuilder};
+use ignore::Match;
+use std::collections::HashMap;
 use std::io::stdin;
 
 fn main() -> Result<()> {
     let codeowner_path = ".github/CODEOWNERS";
     let cwd = std::env::current_dir()?;
     let codeowner = std::fs::read_to_string(codeowner_path)?;
-    let owners = parser::parse(&codeowner)
+
+    let owners = parser::parse(&codeowner);
+
+    let owners_by_glob = owners
+        .clone()
         .into_iter()
-        .rev()
-        .map(|owned_path| {
-            matcher::from_owned_path(&cwd, &owned_path.path, owned_path.owners.clone())
-        })
-        .collect::<Result<Vec<_>>>()?;
+        .map(|owned_path| (owned_path.path.clone(), owned_path))
+        .collect::<HashMap<String, parser::OwnedPath>>();
+
+    let mut builder = GitignoreBuilder::new(cwd);
+    let builder = owners
+        .into_iter()
+        .try_fold(&mut builder, |acc, owned_path| {
+            acc.add_line(None, &owned_path.path)
+        })?;
+
     let paths = stdin().lines().filter_map(|line| {
         let line = line.ok()?;
         if line.is_empty() {
@@ -23,23 +34,23 @@ fn main() -> Result<()> {
         Some(line.to_string())
     });
 
-    find_owners(owners, paths)
+    find_owners(builder.build()?, owners_by_glob, paths)
 }
 
 fn find_owners<I: Iterator<Item = String>>(
-    owners: Vec<matcher::OwnedMatcher>,
+    matcher: Gitignore,
+    owners_by_glob: HashMap<String, parser::OwnedPath>,
     paths: I,
 ) -> Result<()> {
-    paths.for_each(|path| {
-        let owner = owners
-            .clone()
-            .into_iter()
-            .find(|owner| owner.ignorer.matched(&path, false).is_ignore());
-
-        match owner {
-            Some(owner) => println!("{path}: {}", owner.owners.join(" ")),
-            None => println!("{path}: No owner"),
+    paths.for_each(|path| match matcher.matched(&path, false) {
+        Match::Ignore(glob) => {
+            if let Some(owner) = owners_by_glob.get(glob.original()) {
+                println!("{path}: {}", owner.owners.join(" "))
+            } else {
+                println!("{path}: No owner found for this path")
+            }
         }
+        _ => println!("{path}: No owner"),
     });
 
     Ok(())

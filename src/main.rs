@@ -31,11 +31,16 @@ fn find_owners<I: Iterator<Item = String>>(
     paths: I,
 ) -> Result<()> {
     paths.for_each(|path| {
-        let _ = owners
+        let owner = owners
             .clone()
-            .iter()
-            .find(|owner| owner.ignorer.matched(&path, false).is_ignore())
-            .map(|owner| println!("{}: {}", path, owner.owners.join(" ")));
+            .into_iter()
+            .find(|owner| owner.ignorer.matched(&path, false).is_ignore());
+
+        match owner {
+            Some(owner) => println!("{path}: {}", owner.owners.join(" ")),
+            None => println!("{path}: No owner"),
+        }
     });
+
     Ok(())
 }

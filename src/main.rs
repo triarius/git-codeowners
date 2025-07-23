@@ -15,8 +15,8 @@ fn main() -> Result<()> {
     let owners_by_glob = owners
         .clone()
         .into_iter()
-        .map(|owned_path| (owned_path.path.clone(), owned_path))
-        .collect::<HashMap<String, parser::OwnedPath>>();
+        .map(|owned_path| (owned_path.path.clone(), owned_path.owners))
+        .collect::<HashMap<String, Vec<String>>>();
 
     let mut builder = GitignoreBuilder::new(cwd);
     let builder = owners

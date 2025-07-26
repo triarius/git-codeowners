@@ -31,7 +31,7 @@ mod tests {
 
     #[test]
     fn test_parse() {
-        let input = r#"
+        let input = r"
             # This is a comment
             /src/ codeowner1 codeowner2
             /docs/ codeowner3
@@ -40,7 +40,7 @@ mod tests {
             /src/utils/ codeowner5
             # Final comment
             /src/utils/helpers/ codeowner6
-            "#;
+            ";
 
         let expected: CodeOwners = vec![
             ("/src/", vec!["codeowner1", "codeowner2"]),
@@ -56,7 +56,7 @@ mod tests {
         })
         .collect();
 
-        assert_eq!(parse(input), expected)
+        assert_eq!(parse(input), expected);
     }
 
     #[test]

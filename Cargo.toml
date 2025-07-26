@@ -11,6 +11,6 @@ ignore = "0.4.23"
 [dev-dependencies]
 pretty_assertions = "1.4.1"
 
-[lint.clippy]
+[lints.clippy]
 all = "deny"
 pedantic = "deny"

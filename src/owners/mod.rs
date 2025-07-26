@@ -17,10 +17,10 @@ pub fn find_and_print(codeowners: CodeOwners, paths: impl Iterator<Item = String
         .try_fold(&mut builder, |acc, op| acc.add_line(None, &op.path))?;
 
     find(builder.build()?, codeowners_by_glob, paths).for_each(|(path, owners)| {
-        if !owners.is_empty() {
-            println!("{path}: {}", owners.join(", "));
-        } else {
+        if owners.is_empty() {
             println!("{path}: No owners found");
+        } else {
+            println!("{path}: {}", owners.join(", "));
         }
     });
 

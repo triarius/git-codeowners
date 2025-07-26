@@ -7,7 +7,7 @@ use std::io::stdin;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
-struct Args {
+struct Cli {
     /// Path to the CODEOWNERS file
     #[arg(short, long, default_value = ".github/CODEOWNERS")]
     path: String,
@@ -24,12 +24,12 @@ enum Command {
 }
 
 fn main() -> Result<()> {
-    let args = Args::parse();
+    let cli = Cli::parse();
 
-    let codeowner = std::fs::read_to_string(args.path)?;
+    let codeowner = std::fs::read_to_string(cli.path)?;
     let codeowners = parser::parse(&codeowner);
 
-    match args.command {
+    match cli.command {
         Command::Find { paths } => {
             let paths = if paths.is_empty() {
                 stdin()

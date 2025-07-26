@@ -32,16 +32,7 @@ fn main() -> Result<()> {
     match cli.command {
         Command::Find { paths } => {
             let paths = if paths.is_empty() {
-                stdin()
-                    .lines()
-                    .filter_map(|line| {
-                        let line = line.ok()?;
-                        if line.is_empty() {
-                            return None;
-                        }
-                        Some(line.to_string())
-                    })
-                    .collect::<Vec<_>>()
+                paths_from_stdin()
             } else {
                 paths
             };
@@ -49,4 +40,17 @@ fn main() -> Result<()> {
             owners::find_and_print(codeowners, paths.into_iter())
         }
     }
+}
+
+fn paths_from_stdin() -> Vec<String> {
+    stdin()
+        .lines()
+        .filter_map(|line| {
+            let line = line.ok()?.trim().to_string();
+            if line.is_empty() {
+                return None;
+            }
+            Some(line)
+        })
+        .collect::<Vec<_>>()
 }

@@ -1,7 +1,7 @@
 mod owners;
 mod parser;
 
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use color_eyre::Result;
 use std::io::stdin;
 
@@ -11,6 +11,16 @@ struct Args {
     /// Path to the CODEOWNERS file
     #[arg(short, long, default_value = ".github/CODEOWNERS")]
     path: String,
+
+    #[command(subcommand)]
+    command: Command,
+}
+
+#[derive(Subcommand, Debug)]
+enum Command {
+    /// Find owners for the specified paths.
+    /// Reads paths from STDIN if not provided as positional arguments.
+    Find { paths: Vec<String> },
 }
 
 fn main() -> Result<()> {
@@ -18,13 +28,25 @@ fn main() -> Result<()> {
 
     let codeowner = std::fs::read_to_string(args.path)?;
     let codeowners = parser::parse(&codeowner);
-    let paths = stdin().lines().filter_map(|line| {
-        let line = line.ok()?;
-        if line.is_empty() {
-            return None;
-        }
-        Some(line.to_string())
-    });
 
-    owners::find_and_print(codeowners, paths)
+    match args.command {
+        Command::Find { paths } => {
+            let paths = if paths.is_empty() {
+                stdin()
+                    .lines()
+                    .filter_map(|line| {
+                        let line = line.ok()?;
+                        if line.is_empty() {
+                            return None;
+                        }
+                        Some(line.to_string())
+                    })
+                    .collect::<Vec<_>>()
+            } else {
+                paths
+            };
+
+            owners::find_and_print(codeowners, paths.into_iter())
+        }
+    }
 }

@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use crate::parser::CodeOwners;
 
-pub fn find_and_print<T: Iterator<Item = String>>(codeowners: CodeOwners, paths: T) -> Result<()> {
+pub fn find_and_print(codeowners: CodeOwners, paths: impl Iterator<Item = String>) -> Result<()> {
     let codeowners_by_glob = codeowners
         .clone()
         .into_iter()
@@ -27,10 +27,10 @@ pub fn find_and_print<T: Iterator<Item = String>>(codeowners: CodeOwners, paths:
     Ok(())
 }
 
-fn find<I: Iterator<Item = String>>(
+fn find(
     matcher: Gitignore,
     owners_by_glob: HashMap<String, Vec<String>>,
-    paths: I,
+    paths: impl Iterator<Item = String>,
 ) -> impl Iterator<Item = (String, Vec<String>)> {
     paths.map(move |path| match matcher.matched(&path, false) {
         ignore::Match::Ignore(glob) => {

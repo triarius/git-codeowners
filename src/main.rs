@@ -3,12 +3,12 @@ mod parser;
 
 use clap::{Parser, Subcommand};
 use color_eyre::Result;
-use std::io::stdin;
+use std::{fs, io::stdin};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
-    /// Path to the CODEOWNERS file
+    /// Path to the CODEOWNERS file.
     #[arg(short, long, default_value = ".github/CODEOWNERS")]
     path: String,
 
@@ -26,8 +26,7 @@ enum Command {
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
-    let codeowner = std::fs::read_to_string(cli.path)?;
-    let codeowners = parser::parse(&codeowner);
+    let codeowners = parser::parse(&fs::read_to_string(cli.path)?);
 
     match cli.command {
         Command::Find { paths } => {

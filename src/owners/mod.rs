@@ -1,13 +1,39 @@
-use ignore::{gitignore::Gitignore, Match};
+use color_eyre::Result;
+use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::collections::HashMap;
 
-pub fn find<I: Iterator<Item = String>>(
+use crate::parser::CodeOwners;
+
+pub fn find_and_print<T: Iterator<Item = String>>(codeowners: CodeOwners, paths: T) -> Result<()> {
+    let codeowners_by_glob = codeowners
+        .clone()
+        .into_iter()
+        .map(|owned_path| (owned_path.path.clone(), owned_path.owners))
+        .collect::<HashMap<String, Vec<String>>>();
+
+    let mut builder = GitignoreBuilder::new(std::env::current_dir()?);
+    let builder = codeowners
+        .into_iter()
+        .try_fold(&mut builder, |acc, op| acc.add_line(None, &op.path))?;
+
+    find(builder.build()?, codeowners_by_glob, paths).for_each(|(path, owners)| {
+        if !owners.is_empty() {
+            println!("{path}: {}", owners.join(", "));
+        } else {
+            println!("{path}: No owners found");
+        }
+    });
+
+    Ok(())
+}
+
+fn find<I: Iterator<Item = String>>(
     matcher: Gitignore,
     owners_by_glob: HashMap<String, Vec<String>>,
     paths: I,
 ) -> impl Iterator<Item = (String, Vec<String>)> {
     paths.map(move |path| match matcher.matched(&path, false) {
-        Match::Ignore(glob) => {
+        ignore::Match::Ignore(glob) => {
             if let Some(owners) = owners_by_glob.get(glob.original()) {
                 (path, owners.clone())
             } else {

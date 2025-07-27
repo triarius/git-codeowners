@@ -6,7 +6,8 @@ use color_eyre::Result;
 use std::{fs, io::stdin};
 
 #[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
+#[command(author, version, about)]
+/// A tool to find code owners based on a CODEOWNERS file.
 struct Cli {
     /// Path to the CODEOWNERS file.
     #[arg(short, long, default_value = ".github/CODEOWNERS")]

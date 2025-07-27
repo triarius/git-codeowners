@@ -1,3 +1,4 @@
+mod owned;
 mod owners;
 mod parser;
 
@@ -22,6 +23,13 @@ enum Command {
     /// Find owners for the specified paths.
     /// Reads paths from STDIN if not provided as positional arguments.
     Find { paths: Vec<String> },
+    /// Print all files owned by the specified owner.
+    OwnedBy {
+        owner: String,
+
+        #[arg(short, long, default_value = ".")]
+        dir: String,
+    },
 }
 
 fn main() -> Result<()> {
@@ -39,6 +47,7 @@ fn main() -> Result<()> {
 
             owners::find_and_print(codeowners, paths.into_iter())
         }
+        Command::OwnedBy { owner, dir } => owned::by(codeowners, &owner, &dir),
     }
 }
 

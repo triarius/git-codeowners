@@ -19,6 +19,12 @@ pub fn parse(input: &str) -> CodeOwners {
             let path = tokens.next()?.to_string();
             let owners: Vec<String> = tokens.map(String::from).collect();
 
+            let path = if path.ends_with('/') {
+                format!("{path}**")
+            } else {
+                path
+            };
+
             Some(OwnedPath { path, owners })
         })
         .collect()
@@ -43,11 +49,11 @@ mod tests {
             ";
 
         let expected: CodeOwners = vec![
-            ("/src/", vec!["codeowner1", "codeowner2"]),
-            ("/docs/", vec!["codeowner3"]),
-            ("/tests/", vec!["codeowner4"]),
-            ("/src/utils/", vec!["codeowner5"]),
-            ("/src/utils/helpers/", vec!["codeowner6"]),
+            ("/src/**", vec!["codeowner1", "codeowner2"]),
+            ("/docs/**", vec!["codeowner3"]),
+            ("/tests/**", vec!["codeowner4"]),
+            ("/src/utils/**", vec!["codeowner5"]),
+            ("/src/utils/helpers/**", vec!["codeowner6"]),
         ]
         .into_iter()
         .map(|(path, owners)| OwnedPath {
@@ -76,15 +82,15 @@ mod tests {
             ("*.js", vec!["@js-owner"]),
             ("*.go", vec!["docs@example.com"]),
             ("*.txt", vec!["@octo-org/octocats"]),
-            ("/build/logs/", vec!["@doctocat"]),
+            ("/build/logs/**", vec!["@doctocat"]),
             ("docs/*", vec!["docs@example.com"]),
-            ("apps/", vec!["@octocat"]),
-            ("/docs/", vec!["@doctocat"]),
-            ("/scripts/", vec!["@doctocat", "@octocat"]),
+            ("apps/**", vec!["@octocat"]),
+            ("/docs/**", vec!["@doctocat"]),
+            ("/scripts/**", vec!["@doctocat", "@octocat"]),
             ("**/logs", vec!["@octocat"]),
-            ("/apps/", vec!["@octocat"]),
+            ("/apps/**", vec!["@octocat"]),
             ("/apps/github", vec![]),
-            ("/apps/", vec!["@octocat"]),
+            ("/apps/**", vec!["@octocat"]),
             ("/apps/github", vec!["@doctocat"]),
         ]
         .into_iter()

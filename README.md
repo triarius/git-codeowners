@@ -20,8 +20,9 @@ Change directory to a git repo with a CODEOWNERS file.
 Usage: git-codeowners [OPTIONS] <COMMAND>
 
 Commands:
-  find  Find owners for the specified paths. Reads paths from STDIN if not provided as positional arguments
-  help  Print this message or the help of the given subcommand(s)
+  of         Find owners for the specified paths. Reads paths from STDIN if not provided as positional arguments
+  inventory  Print all files owned by the specified owner
+  help       Print this message or the help of the given subcommand(s)
 
 Options:
   -p, --path <PATH>  Path to the CODEOWNERS file [default: .github/CODEOWNERS]
@@ -31,5 +32,5 @@ Options:
 
 ### Detecting CODEOWNERS of all files changed in a branch
 ```sh
-git diff (git merge-base origin/main HEAD) --name-only | git codeowners find
+git diff (git merge-base origin/main HEAD) --name-only | git codeowners of
 ```

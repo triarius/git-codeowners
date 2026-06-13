@@ -1,5 +1,5 @@
-mod owned;
-mod owners;
+mod inventory;
+mod of;
 mod parser;
 
 use clap::{Parser, Subcommand};
@@ -22,9 +22,9 @@ struct Cli {
 enum Command {
     /// Find owners for the specified paths.
     /// Reads paths from STDIN if not provided as positional arguments.
-    Find { paths: Vec<String> },
+    Of { paths: Vec<String> },
     /// Print all files owned by the specified owner.
-    OwnedBy {
+    Inventory {
         owner: String,
 
         #[arg(short, long, default_value = ".")]
@@ -38,16 +38,16 @@ fn main() -> Result<()> {
     let codeowners = parser::parse(&fs::read_to_string(cli.path)?);
 
     match cli.command {
-        Command::Find { paths } => {
+        Command::Of { paths } => {
             let paths = if paths.is_empty() {
                 paths_from_stdin()
             } else {
                 paths
             };
 
-            owners::find_and_print(codeowners, paths.into_iter())
+            of::find_and_print(codeowners, paths.into_iter())
         }
-        Command::OwnedBy { owner, dir } => owned::by(codeowners, &owner, &dir),
+        Command::Inventory { owner, dir } => inventory::by(codeowners, &owner, &dir),
     }
 }
 

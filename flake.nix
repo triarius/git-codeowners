@@ -46,16 +46,8 @@
           commonArgs = {
             inherit src;
             strictDeps = true;
-            nativeBuildInputs = with pkgs; [ pkg-config ];
-            buildInputs =
-              with pkgs;
-              [
-                openssl
-              ]
-              ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
-                pkgs.darwin.apple_sdk.frameworks.Security
-                pkgs.darwin.apple_sdk.frameworks.SystemConfiguration
-              ];
+            nativeBuildInputs = [ pkgs.pkg-config ];
+            buildInputs = [ pkgs.openssl ];
           };
 
           # Build *only* the dependencies to cache them in the Nix store
